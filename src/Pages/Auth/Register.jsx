@@ -3,29 +3,60 @@ import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
 import { LoginValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 
 const initialValues = {
+    name: '',
     email: '',
     password: ''
 }
 
-const Login = () => {
+const Register = () => {
+    const navigate = useNavigate();
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const { email, password } = values;
-        const response = await AuthService.login(email, password);
+        try {
+            const { name, email, password } = values;
+            const response = await AuthService.register(name, email, password);
+            navigate('/');
+            setSubmitting(false);
+        } catch (error) {
+            console.log("here");
+            
+            initialValues.password = '';
+        } finally {
+            setSubmitting(false); // Always call this
+        }
+
     }
 
     return (
         <StyledAuthLayout>
             <Typography variant="h5" gutterBottom align="center">
-                Login
+                Register
             </Typography>
             <Formik initialValues={initialValues} validationSchema={LoginValidator} onSubmit={handleFormSubmit}>
                 {({ values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting }) => {
                     return (
                         <Form noValidate onSubmit={handleSubmit} className="mt-d">
+                            <FormGroup>
+                                <label className="mb-h" htmlFor="email">
+                                    Name
+                                </label>
+                                <TextField
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    placeholder="Enter your name"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.name}
+                                    error={touched.name && !!errors?.name}
+                                    helperText={touched.name && errors?.name ? String(errors?.name) : ''}
+                                    sx={{ mb: 2 }}
+                                >
+                                </TextField>
+                            </FormGroup>
                             <FormGroup>
                                 <label className="mb-h" htmlFor="email">
                                     Email
@@ -67,8 +98,8 @@ const Login = () => {
                                     Login
                                 </MuiButton>
                                 <Typography className="desc mt">
-                                    Does not have an account?{' '}
-                                    <Link className="no-underline color-primary" to="/register">Sign up</Link>
+                                    Already have an account?{' '}
+                                    <Link className="no-underline color-primary" to="/">Login</Link>
                                 </Typography>
                             </Box>
                         </Form>
@@ -79,4 +110,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default Register;

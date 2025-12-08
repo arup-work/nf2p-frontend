@@ -28,7 +28,7 @@ const REGISTER_PASSWORD = yup
 
 export const LoginValidator = yup.object({
     email: EMAIL,
-    Password: LOGIN_PASSWORD
+    password: LOGIN_PASSWORD
 })
 
 export const RegisterValidator = yup.object({
