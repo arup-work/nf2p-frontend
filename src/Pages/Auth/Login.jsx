@@ -3,8 +3,10 @@ import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
 import { LoginValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
+import { useEffect } from "react";
+import { showErrorToast, showSuccessToast } from "../../Helpers/Utils/ToastUtils";
 
 const initialValues = {
     email: '',
@@ -12,10 +14,27 @@ const initialValues = {
 }
 
 const Login = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Get the message sent from Register page
+    const successMessage = location.state?.successMessage;
+
     const handleFormSubmit = async (values, { setSubmitting }) => {
         const { email, password } = values;
         const response = await AuthService.login(email, password);
     }
+
+    useEffect(() => {
+        if (location.state?.message) {
+            if (location.state.type === 'success') {
+                showSuccessToast(location.state.message);
+            } else if (location.state.type === 'error') {
+                showErrorToast(location.state.message);
+            }
+        }
+        navigate('.', { state: null, replace: true }); // '.' means current path, replace clears state
+    },[location.state])
 
     return (
         <StyledAuthLayout>

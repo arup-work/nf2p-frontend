@@ -1,7 +1,7 @@
 import { Box, FormGroup, TextField, Typography } from "@mui/material"
 import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
-import { LoginValidator } from "../../Shared/Validator";
+import { RegisterValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
 import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
@@ -14,16 +14,19 @@ const initialValues = {
 
 const Register = () => {
     const navigate = useNavigate();
-    const handleFormSubmit = async (values, { setSubmitting }) => {
+    const handleFormSubmit = async (values, { setSubmitting, setFieldValue }) => {
         try {
             const { name, email, password } = values;
             const response = await AuthService.register(name, email, password);
-            navigate('/');
+            navigate('/', {
+                state: {
+                    message: response.message,
+                    type: 'success'
+                }
+            });
             setSubmitting(false);
         } catch (error) {
-            console.log("here");
-            
-            initialValues.password = '';
+            setFieldValue("password", "", false);
         } finally {
             setSubmitting(false); // Always call this
         }
@@ -35,12 +38,12 @@ const Register = () => {
             <Typography variant="h5" gutterBottom align="center">
                 Register
             </Typography>
-            <Formik initialValues={initialValues} validationSchema={LoginValidator} onSubmit={handleFormSubmit}>
+            <Formik initialValues={initialValues} validationSchema={RegisterValidator} onSubmit={handleFormSubmit}>
                 {({ values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting }) => {
                     return (
                         <Form noValidate onSubmit={handleSubmit} className="mt-d">
                             <FormGroup>
-                                <label className="mb-h" htmlFor="email">
+                                <label className="mb-h" htmlFor="name">
                                     Name
                                 </label>
                                 <TextField

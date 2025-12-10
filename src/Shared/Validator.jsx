@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-const NAME = (type = 'Name') => {
+const NAME = (type = 'Name') => 
     yup
         .string().max(255, `${type} should have maximum 255 character`)
         .matches(
@@ -8,7 +8,6 @@ const NAME = (type = 'Name') => {
             `${type} should not contains numbers, spaces at first character & special characters`
         )
         .required(`${type} is required`)
-}
 
 const EMAIL = yup
     .string().matches(
