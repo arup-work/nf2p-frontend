@@ -1,25 +1,41 @@
 import { Box, FormGroup, TextField, Typography, Link } from "@mui/material"
 import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
-import { LoginValidator } from "../../Shared/Validator";
+import { ResetPasswordValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 import { useEffect } from "react";
 import { showErrorToast, showSuccessToast } from "../../Helpers/Utils/ToastUtils";
 
 const initialValues = {
-    email: '',
-    password: ''
+    password: '',
+    confirm_password: '',
 }
 
-const Login = () => {
+const ResetPassword = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { token } = useParams();
 
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const { email, password } = values;
-        const response = await AuthService.login(email, password);
+        setSubmitting(true);
+        try {
+            const { password } = values;
+            const response = await AuthService.resetPassword(password, token);
+            navigate('/', {
+                state: {
+                    message: response.message,
+                    type: 'success'
+                }
+            });
+        } catch (error) {
+            // showErrorToast(error.response?.data?.message || "Failed to update password");
+
+        } finally {
+            setSubmitting(true);
+        }
+
     }
 
     useEffect(() => {
@@ -36,30 +52,12 @@ const Login = () => {
     return (
         <StyledAuthLayout>
             <Typography variant="h5" gutterBottom align="center">
-                Login
+                Password Recovery
             </Typography>
-            <Formik initialValues={initialValues} validationSchema={LoginValidator} onSubmit={handleFormSubmit}>
+            <Formik initialValues={initialValues} validationSchema={ResetPasswordValidator} onSubmit={handleFormSubmit}>
                 {({ values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting }) => {
                     return (
                         <Form noValidate onSubmit={handleSubmit} className="mt-d">
-                            <FormGroup>
-                                <label className="mb-h" htmlFor="email">
-                                    Email
-                                </label>
-                                <TextField
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="you@company.com"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.email}
-                                    error={touched.email && !!errors?.email}
-                                    helperText={touched.email && errors?.email ? String(errors?.email) : ''}
-                                    sx={{ mb: 2 }}
-                                >
-                                </TextField>
-                            </FormGroup>
                             <FormGroup>
                                 <label className="mb-h" htmlFor="password">
                                     Password
@@ -78,25 +76,31 @@ const Login = () => {
                                 >
                                 </TextField>
                             </FormGroup>
+                            <FormGroup>
+                                <label className="mb-h" htmlFor="password">
+                                    Confirm Password
+                                </label>
+                                <TextField
+                                    id="confirm_password"
+                                    name="confirm_password"
+                                    type="password"
+                                    placeholder="******"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.confirm_password}
+                                    error={touched.confirm_password && !!errors?.confirm_password}
+                                    helperText={touched.confirm_password && errors?.confirm_password ? String(errors?.confirm_password) : ''}
+                                    sx={{ mb: 2 }}
+                                >
+                                </TextField>
+                            </FormGroup>
                             <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {/* Right-aligned Forgot Password */}
-                                <Box sx={{ textAlign: 'right' }}>
-                                    <Link component={RouterLink} to="/forgot-password" underline="none" color="primary">
-                                        Forgot Password?
-                                    </Link>
-                                </Box>
-
-                                {/* Submit Button */}
                                 <MuiButton loading={isSubmitting} type="submit" fullWidth size="large">
-                                    Login
+                                    Reset password
                                 </MuiButton>
-
-                                {/* Sign Up */}
-                                <Typography align="center" variant="body2">
-                                    Don't have an account?{' '}
-                                    <Link component={RouterLink} to="/register" underline="none" color="primary">
-                                        Sign up
-                                    </Link>
+                                <Typography className="desc mt">
+                                    Already have an account?{' '}
+                                    <Link component={RouterLink} to="/" underline="none" color="primary">Back to Login</Link>
                                 </Typography>
                             </Box>
                         </Form>
@@ -107,4 +111,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default ResetPassword;

@@ -1,25 +1,32 @@
 import { Box, FormGroup, TextField, Typography, Link } from "@mui/material"
 import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
-import { LoginValidator } from "../../Shared/Validator";
+import { ForgotPasswordValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 import { useEffect } from "react";
-import { showErrorToast, showSuccessToast } from "../../Helpers/Utils/ToastUtils";
 
 const initialValues = {
     email: '',
-    password: ''
 }
 
-const Login = () => {
+const ForgotPassword = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const handleFormSubmit = async (values, { setSubmitting }) => {
-        const { email, password } = values;
-        const response = await AuthService.login(email, password);
+    const handleFormSubmit = async (values, { setSubmitting, setFieldValue }) => {
+        setSubmitting(true);
+        try {
+            const { email } = values;
+            await AuthService.forgetPassword(email);
+        } catch (error) {
+            showErrorToast(error.response?.data?.message || "Failed to send reset link.");
+        } finally {
+            setFieldValue("email", "", false);
+            setSubmitting(false);
+        }
+
     }
 
     useEffect(() => {
@@ -36,9 +43,9 @@ const Login = () => {
     return (
         <StyledAuthLayout>
             <Typography variant="h5" gutterBottom align="center">
-                Login
+                Password recovery
             </Typography>
-            <Formik initialValues={initialValues} validationSchema={LoginValidator} onSubmit={handleFormSubmit}>
+            <Formik initialValues={initialValues} validationSchema={ForgotPasswordValidator} onSubmit={handleFormSubmit}>
                 {({ values, handleChange, handleBlur, handleSubmit, touched, errors, isSubmitting }) => {
                     return (
                         <Form noValidate onSubmit={handleSubmit} className="mt-d">
@@ -60,42 +67,16 @@ const Login = () => {
                                 >
                                 </TextField>
                             </FormGroup>
-                            <FormGroup>
-                                <label className="mb-h" htmlFor="password">
-                                    Password
-                                </label>
-                                <TextField
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    placeholder="******"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.password}
-                                    error={touched.password && !!errors?.password}
-                                    helperText={touched.password && errors?.password ? String(errors?.password) : ''}
-                                    sx={{ mb: 2 }}
-                                >
-                                </TextField>
-                            </FormGroup>
                             <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {/* Right-aligned Forgot Password */}
-                                <Box sx={{ textAlign: 'right' }}>
-                                    <Link component={RouterLink} to="/forgot-password" underline="none" color="primary">
-                                        Forgot Password?
-                                    </Link>
-                                </Box>
-
                                 {/* Submit Button */}
                                 <MuiButton loading={isSubmitting} type="submit" fullWidth size="large">
-                                    Login
+                                    Reset Your Password
                                 </MuiButton>
 
                                 {/* Sign Up */}
                                 <Typography align="center" variant="body2">
-                                    Don't have an account?{' '}
-                                    <Link component={RouterLink} to="/register" underline="none" color="primary">
-                                        Sign up
+                                    <Link component={RouterLink} to="/" underline="none" color="primary">
+                                        Back to Login
                                     </Link>
                                 </Typography>
                             </Box>
@@ -107,4 +88,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default ForgotPassword;

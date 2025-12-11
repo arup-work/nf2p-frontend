@@ -1,9 +1,9 @@
-import { Box, FormGroup, TextField, Typography } from "@mui/material"
+import { Box, FormGroup, TextField, Typography, Link } from "@mui/material"
 import StyledAuthLayout from "../../Components/StyledAuthLayout"
 import { Form, Formik } from "formik";
 import { RegisterValidator } from "../../Shared/Validator";
 import MuiButton from "../../Components/MUI/MuiButton";
-import { Link, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 
 const initialValues = {
@@ -15,6 +15,7 @@ const initialValues = {
 const Register = () => {
     const navigate = useNavigate();
     const handleFormSubmit = async (values, { setSubmitting, setFieldValue }) => {
+        setSubmitting(true);
         try {
             const { name, email, password } = values;
             const response = await AuthService.register(name, email, password);
@@ -24,7 +25,6 @@ const Register = () => {
                     type: 'success'
                 }
             });
-            setSubmitting(false);
         } catch (error) {
             setFieldValue("password", "", false);
         } finally {
@@ -96,13 +96,13 @@ const Register = () => {
                                 >
                                 </TextField>
                             </FormGroup>
-                            <Box className="pt-d">
+                            <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 <MuiButton loading={isSubmitting} type="submit" fullWidth size="large">
                                     Login
                                 </MuiButton>
-                                <Typography className="desc mt">
+                                <Typography align="center" variant="body2">
                                     Already have an account?{' '}
-                                    <Link className="no-underline color-primary" to="/">Login</Link>
+                                    <Link component={RouterLink} to="/" underline="none" color="primary">Login</Link>
                                 </Typography>
                             </Box>
                         </Form>

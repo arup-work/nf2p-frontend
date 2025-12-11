@@ -36,3 +36,16 @@ export const RegisterValidator = yup.object({
     password: REGISTER_PASSWORD
 })
 
+export const ForgotPasswordValidator = yup.object({
+    email: EMAIL
+})
+
+export const ResetPasswordValidator = yup.object({
+  password: REGISTER_PASSWORD,
+
+  confirm_password: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref('password')], "Passwords do not match"),
+});
+
