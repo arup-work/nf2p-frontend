@@ -16,7 +16,6 @@ const AuthService = {
         try {
             const response = await apiRequest('auth/register', "POST", { name, email, password });
             showSuccessToast(response.message);
-            console.log(response);
             return response;
         } catch (error) {
             const message = error.response?.data?.message || error.message || "Registration failed";

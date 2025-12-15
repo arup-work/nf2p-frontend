@@ -7,6 +7,8 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 import { useEffect } from "react";
 import { showErrorToast, showSuccessToast } from "../../Helpers/Utils/ToastUtils";
+import { useDispatch } from "react-redux";
+import { login } from "../../Redux/Slices/AuthSlice";
 
 const initialValues = {
     email: '',
@@ -16,10 +18,18 @@ const initialValues = {
 const Login = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch()
+
 
     const handleFormSubmit = async (values, { setSubmitting }) => {
         const { email, password } = values;
         const response = await AuthService.login(email, password);
+        // console.log(response);
+        
+        dispatch(login({
+            token: response.data.token,
+            user: response.data.user
+        }));
     }
 
     useEffect(() => {
