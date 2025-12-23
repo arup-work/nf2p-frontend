@@ -19,9 +19,12 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../Redux/Slices/AuthSlice';
 
 export function Navbar({ onMenuClick, onNavigate }) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const dispatch = useDispatch();
 
   const userData = {
     name: 'John Doe',
@@ -35,6 +38,7 @@ export function Navbar({ onMenuClick, onNavigate }) {
   };
 
   const handleProfileMenuClose = () => {
+    dispatch(logout);
     setAnchorEl(null);
   };
 

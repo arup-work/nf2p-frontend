@@ -20,9 +20,16 @@ const authenticateSlice = createSlice({
 
             state.isAuthenticated = true;
             state.auth = { token, user }
+        },
+        logout(state, action) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            state.isAuthenticated = false;
+            state.auth = initialAuthState.auth
         }
     }
 })
 
-export const { login } = authenticateSlice.actions;
+export const { login, logout } = authenticateSlice.actions;
 export default authenticateSlice.reducer;
