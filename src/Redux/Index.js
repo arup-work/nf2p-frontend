@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterReducer  from './Slices/AuthSlice';
+import authReducer from './Slices/AuthSlice';
+import flashReducer from './Slices/FlashSlice';
 
 const reduxStore = configureStore({
     reducer: {
-        auth: counterReducer 
+        auth: authReducer,
+        flash: flashReducer
     }
 })
 

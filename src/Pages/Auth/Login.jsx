@@ -7,8 +7,9 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import AuthService from "../../Services/AuthService";
 import { useEffect } from "react";
 import { showErrorToast, showSuccessToast } from "../../Helpers/Utils/ToastUtils";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../Redux/Slices/AuthSlice";
+import { clearFlashMessage, setFlashMessage } from "../../Redux/Slices/FlashSlice";
 
 const initialValues = {
     email: '',
@@ -19,29 +20,47 @@ const Login = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch()
-
+    const flash = useSelector(state => state.flash);
 
     const handleFormSubmit = async (values, { setSubmitting }) => {
         const { email, password } = values;
         const response = await AuthService.login(email, password);
         // console.log(response);
-        
+
         dispatch(login({
             token: response.data.token,
             user: response.data.user
         }));
+        dispatch(setFlashMessage({
+            message: response.message,
+            type: "success"
+        }))
     }
 
     useEffect(() => {
-        if (location.state?.message) {
-            if (location.state.type === 'success') {
-                showSuccessToast(location.state.message);
-            } else if (location.state.type === 'error') {
-                showErrorToast(location.state.message);
+        if (location.state?.message && location.state?.type) {
+            const { message, type } = location.state;
+            if (type.toLowerCase() === 'success') {
+                showSuccessToast(message);
+            } else if (type.toLowerCase() === 'error') {
+                showErrorToast(message);
             }
+            // Clear state after showing
+            navigate('.', { replace: true, state: null });
         }
-        navigate('.', { state: null, replace: true }); // '.' means current path, replace clears state
-    }, [location.state])
+    }, [location.key]);
+
+    useEffect(() => {
+        if (flash.message) {
+            if (flash.type === 'success') {
+                showSuccessToast(flash.message);
+            } else if (flash.type === 'error') {
+                showErrorToast(flash.message);
+            }
+
+            dispatch(clearFlashMessage());
+        }
+    }, [flash.message]);
 
     return (
         <StyledAuthLayout>

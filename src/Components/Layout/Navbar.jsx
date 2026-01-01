@@ -19,16 +19,19 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../Redux/Slices/AuthSlice';
+import { useNavigate } from 'react-router-dom';
+import { setFlashMessage } from '../../Redux/Slices/FlashSlice';
 
 export function Navbar({ onMenuClick, onNavigate }) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const authDetails = useSelector(state => state.auth.auth);
   const dispatch = useDispatch();
 
   const userData = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: authDetails.user.name,
+    email: authDetails.user.email,
     role: 'Administrator',
     avatar: 'JD'
   };
@@ -38,8 +41,15 @@ export function Navbar({ onMenuClick, onNavigate }) {
   };
 
   const handleProfileMenuClose = () => {
-    dispatch(logout);
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    dispatch(setFlashMessage({
+      message: "You have been logged out successfully!",
+      type: "success"
+    }))
+    dispatch(logout());
   };
 
   const handleProfileClick = () => {
@@ -53,9 +63,9 @@ export function Navbar({ onMenuClick, onNavigate }) {
   };
 
   return (
-    <AppBar 
-      position="fixed" 
-      sx={{ 
+    <AppBar
+      position="fixed"
+      sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
         bgcolor: 'white',
         color: 'text.primary',
@@ -74,11 +84,11 @@ export function Navbar({ onMenuClick, onNavigate }) {
         </IconButton>
 
         {/* Logo */}
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            fontWeight: 'bold', 
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            fontWeight: 'bold',
             color: 'primary.main',
             flexGrow: { xs: 1, md: 0 }
           }}
@@ -90,8 +100,8 @@ export function Navbar({ onMenuClick, onNavigate }) {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* Notifications */}
-        <IconButton 
-          color="inherit" 
+        <IconButton
+          color="inherit"
           sx={{ mr: 2 }}
         >
           <Badge badgeContent={4} color="error">
@@ -126,11 +136,11 @@ export function Navbar({ onMenuClick, onNavigate }) {
           >
             {userData.avatar}
           </Avatar>
-          
+
           {/* Name and Role - Hidden on mobile */}
-          <Box 
-            sx={{ 
-              ml: 1.5, 
+          <Box
+            sx={{
+              ml: 1.5,
               textAlign: 'left',
               display: { xs: 'none', sm: 'block' }
             }}
@@ -138,8 +148,8 @@ export function Navbar({ onMenuClick, onNavigate }) {
             <Typography variant="body2" fontWeight="600" lineHeight={1.2}>
               {userData.name}
             </Typography>
-            <Typography 
-              variant="caption" 
+            <Typography
+              variant="caption"
               color="text.secondary"
               lineHeight={1.2}
             >
@@ -168,7 +178,7 @@ export function Navbar({ onMenuClick, onNavigate }) {
             Settings
           </MenuItem>
           <Divider />
-          <MenuItem onClick={handleProfileMenuClose}>
+          <MenuItem onClick={handleLogout}>
             <LogoutIcon sx={{ mr: 1.5 }} />
             Logout
           </MenuItem>

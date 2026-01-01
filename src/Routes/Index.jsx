@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom"
 import Login from "../Pages/Auth/Login"
 import Register from "../Pages/Auth/Register"
 import ForgotPassword from "../Pages/Auth/ForgotPassword"
@@ -10,38 +10,40 @@ import AuthLayout from "../Layouts/AuthLayout"
 import DashboardLayout from "../Layouts/DashboardLayout"
 import Loader from "../Components/Loader/Loader"
 
-const RequireAuth = (isAuthenticated) => {
-    let location = useLocation();
-    if (!isAuthenticated) {
-        return <Navigate to="/" state={{ from: location }} />;
-    }
+const RequireAuth = ({ isAuthenticated }) => {
+  // Remove useLocation() completely → avoids infinite loop
 
-    return (
-        <Suspense fallback={<Loader />}>
-            <DashboardLayout />
-        </Suspense>
-    );
-}
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
-const StrictlyNotRequireAuth = (isAuthenticated) => {
-    let location = useLocation();
+  return (
+    <Suspense fallback={<Loader />}>
+      <DashboardLayout>
+        <Outlet /> {/* This renders your protected pages like DashboardPage */}
+      </DashboardLayout>
+    </Suspense>
+  );
+};
 
-    if (isAuthenticated) {
-        return <Navigate to="/dashboard" state={{ from: location }} />;
-    }
+const PublicOnlyRoute = ({ isAuthenticated }) => {
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-    return (
-        <Suspense fallback={<Loader />}>
-            <AuthLayout />
-        </Suspense>
-    );
-}
+  return (
+    <Suspense fallback={<Loader />}>
+      <AuthLayout>
+        <Outlet />
+      </AuthLayout>
+    </Suspense>
+  );
+};
 const RouteComponent = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-    console.log(isAuthenticated);
     return (
         <Routes>
-            <Route element={<StrictlyNotRequireAuth isAuthenticated={isAuthenticated} />}>
+            <Route element={<PublicOnlyRoute isAuthenticated={isAuthenticated} />}>
                 <Route
                     path="/"
                     name="Login"

@@ -1,10 +1,15 @@
 import { Box, Toolbar as MuiToolbar } from '@mui/material';
 import { Navbar } from './Layout/Navbar';
 import { Sidebar } from './Layout/Sidebar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
+import { clearFlashMessage } from '../Redux/Slices/FlashSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { showErrorToast, showSuccessToast } from '../Helpers/Utils/ToastUtils';
 
 export default function StyledMainLayout({ children }) {
+  const flash = useSelector(state => state.flash);
+  const dispatch = useDispatch();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
 
@@ -16,10 +21,22 @@ export default function StyledMainLayout({ children }) {
     setCurrentPage(page);
   };
 
+  useEffect(() => {
+    if (flash.message) {
+      if (flash.type === 'success') {
+        showSuccessToast(flash.message);
+      } else if (flash.type === 'error') {
+        showErrorToast(flash.message);
+      }
+
+      dispatch(clearFlashMessage());
+    }
+  }, [flash.message]);
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <ToastContainer />
-      
+
       {/* Navbar */}
       <Navbar
         onMenuClick={handleDrawerToggle}
