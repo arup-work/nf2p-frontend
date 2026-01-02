@@ -11,6 +11,7 @@ import {
   Box,
   Badge,
   Divider,
+  Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,12 +29,28 @@ export function Navbar({ onMenuClick, onNavigate }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const authDetails = useSelector(state => state.auth.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const getInitials = (name) => {
+    if (!name) {
+      return '';
+    }
+
+    const names = name.trim().split(' ');
+    if (names.length === 1) {
+      // Single name - return first letter
+      return names[0].charAt(0).toUpperCase();
+    }
+
+    // Multiple names - return first letter of first and last name
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+
+  }
   const userData = {
     name: authDetails.user.name,
     email: authDetails.user.email,
     role: 'Administrator',
-    avatar: 'JD'
+    avatar: getInitials(authDetails.user.name)
   };
 
   const handleProfileMenuOpen = (event) => {
@@ -53,7 +70,7 @@ export function Navbar({ onMenuClick, onNavigate }) {
   };
 
   const handleProfileClick = () => {
-    onNavigate('profile');
+    navigate('/profile');
     handleProfileMenuClose();
   };
 
@@ -84,17 +101,22 @@ export function Navbar({ onMenuClick, onNavigate }) {
         </IconButton>
 
         {/* Logo */}
-        <Typography
-          variant="h6"
-          component="div"
+        <Button
           sx={{
             fontWeight: 'bold',
             color: 'primary.main',
-            flexGrow: { xs: 1, md: 0 }
+            fontSize: '1.25rem',
+            textTransform: 'none',
+            flexGrow: { xs: 1, md: 0 },
+            '&:hover': {
+              bgcolor: 'transparent',
+              opacity: 0.8,
+            }
           }}
+          onClick={() => navigate('/dashboard')}
         >
           MyApp
-        </Typography>
+        </Button>
 
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />

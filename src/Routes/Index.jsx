@@ -9,6 +9,7 @@ import DashboardPage from "../Pages/Dashboard/DashboardView"
 import AuthLayout from "../Layouts/AuthLayout"
 import DashboardLayout from "../Layouts/DashboardLayout"
 import Loader from "../Components/Loader/Loader"
+import Profile from "../Pages/Profile/Profile"
 
 const RequireAuth = ({ isAuthenticated }) => {
   // Remove useLocation() completely → avoids infinite loop
@@ -90,6 +91,16 @@ const RouteComponent = () => {
                             <DashboardPage />
                         </Suspense>
                     }
+                />
+                <Route
+                path="/profile"
+                name="Profile"
+                element={
+                  <Suspense fallback={<Loader />}>
+                    <Profile />
+                  </Suspense>
+                }
+                
                 />
             </Route>
         </Routes>
