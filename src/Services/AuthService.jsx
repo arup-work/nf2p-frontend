@@ -12,9 +12,9 @@ const AuthService = {
         }
     },
 
-    register: async (name, email, password) => {
+    register: async (firstName, lastName, email, password) => {
         try {
-            const response = await apiRequest('auth/register', "POST", { name, email, password });
+            const response = await apiRequest('auth/register', "POST", { firstName, lastName, email, password });
             showSuccessToast(response.message);
             return response;
         } catch (error) {

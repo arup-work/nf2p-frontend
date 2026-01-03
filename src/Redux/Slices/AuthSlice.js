@@ -5,7 +5,8 @@ const user = JSON.parse(localStorage.getItem('user'));
 
 const initialAuthState = {
     isAuthenticated: !!token,
-    auth: { token: token || null, user: user || null }
+    user: { firstName: '', lastName: '', email: '', id: '' },
+    token: null,
 }
 
 const authenticateSlice = createSlice({
@@ -19,17 +20,25 @@ const authenticateSlice = createSlice({
             localStorage.setItem('user', JSON.stringify(user));
 
             state.isAuthenticated = true;
-            state.auth = { token, user }
+            state.user = user;
+            state.token = token;
         },
+
+        mE(state, action) {
+            const { user } = action.payload;
+            state.user = user;
+        },
+
         logout(state, action) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 
             state.isAuthenticated = false;
-            state.auth = initialAuthState.auth
+            state.user = initialAuthState.user;
+            state.token = initialAuthState.token;
         }
     }
 })
 
-export const { login, logout } = authenticateSlice.actions;
+export const { login, mE, logout } = authenticateSlice.actions;
 export default authenticateSlice.reducer;

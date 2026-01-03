@@ -27,7 +27,8 @@ import { setFlashMessage } from '../../Redux/Slices/FlashSlice';
 
 export function Navbar({ onMenuClick, onNavigate }) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const authDetails = useSelector(state => state.auth.auth);
+  const authDetails = useSelector(state => state.auth.user);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -47,10 +48,10 @@ export function Navbar({ onMenuClick, onNavigate }) {
 
   }
   const userData = {
-    name: authDetails.user.name,
-    email: authDetails.user.email,
+    name: authDetails.firstName + ' ' + authDetails.lastName,
+    email: authDetails.email,
     role: 'Administrator',
-    avatar: getInitials(authDetails.user.name)
+    avatar: getInitials(authDetails.firstName + ' ' + authDetails.lastName)
   };
 
   const handleProfileMenuOpen = (event) => {
@@ -115,7 +116,7 @@ export function Navbar({ onMenuClick, onNavigate }) {
           }}
           onClick={() => navigate('/dashboard')}
         >
-          MyApp
+          F2P
         </Button>
 
         {/* Spacer */}

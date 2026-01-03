@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
     Box,
     Container,
@@ -27,21 +27,31 @@ import {
     CalendarToday as CalendarIcon,
     Visibility,
     VisibilityOff,
+    Password,
 } from '@mui/icons-material';
 import StyledMainLayout from "../../Components/StyledMainLayout";
+import UserService from "../../Services/UserService";
+import { mE } from "../../Redux/Slices/AuthSlice";
+import ChangePassword from "./ChangePassword";
 
 const Profile = () => {
-    const authDetails = useSelector((state) => state.auth.auth);
+    const authDetails = useSelector((state) => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const dispatch = useDispatch();
+
+
     const [isEditing, setIsEditing] = useState(true);
-    const [showPassword, setShowPassword] = useState(false);
+    const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
 
     // Form State
     const [formData, setFormData] = useState({
-        name: authDetails?.user?.name || '',
-        email: authDetails?.user?.email || '',
-        phone: '+1 234 567 8900',
-        location: 'New York, USA',
-        bio: 'Passionate developer and problem solver',
+        firstName: authDetails?.firstName || '',
+        lastName: authDetails?.lastName || '',
+        email: authDetails?.email || '',
+        phone: '',
+        location: '',
+        bio: '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
@@ -78,10 +88,34 @@ const Profile = () => {
         })
     }
 
-    const handleSave = () => {
-        console.log('Saving profile data:', formData);
-        setIsEditing(false);
+    const getMe = async () => {
+        const response = await UserService.me(token);
+        setFormData({
+            ...formData,
+            firstName: response.firstName,
+            lastName: response.lastName,
+            bio: response.bio,
+            location: response.location,
+            phone: response.phone,
+        })
     }
+
+    const handleSave = async () => {
+        const response = await UserService.profileUpdate(token, formData.firstName, formData.lastName, formData.bio, formData.phone, formData.location);
+        dispatch(mE({
+            user: {
+                firstName: response.firstName,
+                lastName: response.lastName,
+                email: response.email,
+                id: response._id,
+            }
+        }));
+
+    }
+
+    useEffect(() => {
+        getMe();
+    }, [])
 
     return (
         <StyledMainLayout>
@@ -91,7 +125,7 @@ const Profile = () => {
                     elevation={3}
                     sx={{
                         p: 4,
-                        mb: 4,
+                        mb: 2,
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
                         borderRadius: 3,
@@ -109,18 +143,18 @@ const Profile = () => {
                                 boxShadow: 3,
                             }}
                         >
-                            {getInitials(authDetails?.user?.name)}
+                            {getInitials(authDetails.firstName + ' ' + authDetails.lastName)}
                         </Avatar>
 
                         <Box sx={{ flex: 1 }}>
                             <Typography variant="h4" fontWeight="bold" gutterBottom>
-                                {authDetails?.user?.name || 'User Name'}
+                                {authDetails?.firstName + ' ' + authDetails?.lastName || 'User Name'}
                             </Typography>
                             <Typography variant="body1" sx={{ opacity: 0.9, mb: 2 }}>
-                                {authDetails?.user?.email || 'user@example.com'}
+                                {authDetails?.email || 'user@example.com'}
                             </Typography>
                             <Chip
-                                label={authDetails?.user?.role || 'Administrator'}
+                                label={authDetails?.role || 'Administrator'}
                                 sx={{
                                     bgcolor: 'rgba(255, 255, 255, 0.3)',
                                     color: 'white',
@@ -129,28 +163,34 @@ const Profile = () => {
                             />
                         </Box>
 
-                        {/* {!isEditing && (
-                            <Button
-                                variant="contained"
-                                startIcon={<EditIcon />}
-                                onClick={handleEdit}
-                                sx={{
-                                    bgcolor: 'white',
-                                    color: 'primary.main',
-                                    '&:hover': {
-                                        bgcolor: 'rgba(255, 255, 255, 0.9)',
-                                    },
-                                }}
-                            >
-                                Edit Profile
-                            </Button>
-                        )} */}
+
+                        <Button
+                            variant="contained"
+                            startIcon={<Password />}
+                            onClick={() => setOpenPasswordModal(true)}
+
+                            sx={{
+                                bgcolor: 'white',
+                                color: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                },
+                            }}
+                        >
+                            Change Password
+                        </Button>
+                        <ChangePassword
+                            isOpen={openPasswordModal}
+                            onClose={() => setOpenPasswordModal(false)}
+                            token={token}
+                        />
+
                     </Box>
                 </Paper>
 
                 <Grid container spacing={3}>
                     {/* Left Column - Personal Information */}
-                    <Grid item xs={12} md={8}>
+                    <Grid xs={12} md={8}>
                         <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
                             <Typography variant="h6" fontWeight="bold" gutterBottom>
                                 Personal Information
@@ -158,18 +198,31 @@ const Profile = () => {
                             <Divider sx={{ mb: 3 }} />
 
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
+                                {/* First Name & Last Name */}
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField
                                         fullWidth
-                                        label="Full Name"
-                                        name="name"
-                                        value={formData.name}
+                                        label="First Name"
+                                        name="firstName"
+                                        value={formData.firstName}
                                         onChange={handleInputChange}
                                         variant="outlined"
                                     />
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Last Name"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+
+                                {/* Email & Phone */}
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField
                                         fullWidth
                                         label="Email Address"
@@ -177,9 +230,9 @@ const Profile = () => {
                                         type="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        disabled
+                                        disabled={true}
                                         variant="outlined"
-                                        InputProps={{
+                                        slotProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <EmailIcon color="action" />
@@ -189,7 +242,7 @@ const Profile = () => {
                                     />
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField
                                         fullWidth
                                         label="Phone Number"
@@ -197,7 +250,8 @@ const Profile = () => {
                                         value={formData.phone}
                                         onChange={handleInputChange}
                                         variant="outlined"
-                                        InputProps={{
+                                        placeholder="+1 (555) 000-0000"
+                                        slotProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <PhoneIcon color="action" />
@@ -207,7 +261,8 @@ const Profile = () => {
                                     />
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
+                                {/* Location - Full Width */}
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField
                                         fullWidth
                                         label="Location"
@@ -215,7 +270,8 @@ const Profile = () => {
                                         value={formData.location}
                                         onChange={handleInputChange}
                                         variant="outlined"
-                                        InputProps={{
+                                        placeholder="City, State, Country"
+                                        slotProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <LocationIcon color="action" />
@@ -225,7 +281,8 @@ const Profile = () => {
                                     />
                                 </Grid>
 
-                                <Grid item xs={12}>
+                                {/* Bio - Full Width */}
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <TextField
                                         fullWidth
                                         label="Bio"
@@ -233,8 +290,15 @@ const Profile = () => {
                                         value={formData.bio}
                                         onChange={handleInputChange}
                                         multiline
-                                        rows={3}
+                                        rows={2}
                                         variant="outlined"
+                                        placeholder="Tell us a little bit about yourself..."
+                                        helperText={`${formData.bio?.length || 0}/250 characters`}
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: 250
+                                            }
+                                        }}
                                     />
                                 </Grid>
                             </Grid>
@@ -270,7 +334,7 @@ const Profile = () => {
                                             />
                                         </Grid>
 
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <TextField
                                                 fullWidth
                                                 label="New Password"
@@ -282,7 +346,7 @@ const Profile = () => {
                                             />
                                         </Grid>
 
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }}>
                                             <TextField
                                                 fullWidth
                                                 label="Confirm New Password"
@@ -309,8 +373,8 @@ const Profile = () => {
                         </Paper>
                     </Grid>
                 </Grid>
-            </Container>
-        </StyledMainLayout>
+            </Container >
+        </StyledMainLayout >
     );
 
 }

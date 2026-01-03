@@ -5,7 +5,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 const DashboardView = () => {
-    const authUserDetails = useSelector((state) => state.auth.auth);
+    const authUserDetails = useSelector((state) => state.auth.user);
     // Function to convert name to Title Case (Camel Case for each word)
     const toTitleCase = (str) => {
         if (!str) return '';
@@ -19,7 +19,7 @@ const DashboardView = () => {
     return (
         <StyledMainLayout>
             <Typography variant="h6" gutterBottom fontWeight="bold" sx={{ color: 'primary.main' }}>
-                Welcome back, {toTitleCase(authUserDetails.user?.name)}
+                Welcome back, {toTitleCase(authUserDetails?.firstName)} {toTitleCase( authUserDetails?.lastName)}
             </Typography>
 
             <Grid container spacing={3} sx={{ mb: 4, mt: 1 }}>
@@ -63,7 +63,7 @@ const DashboardView = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid  size={{ xs: 12, md: 4 }}>
                     <Card elevation={2}>
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

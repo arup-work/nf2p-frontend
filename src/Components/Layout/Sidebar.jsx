@@ -16,20 +16,23 @@ import {
   People as PeopleIcon,
   Folder as FolderIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 export function Sidebar({ open, onClose, currentPage, onNavigate }) {
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, page: 'dashboard' },
+    { text: 'Dashboard', icon: <DashboardIcon />, page: '/dashboard' },
     { text: 'Analytics', icon: <BarChartIcon />, page: 'analytics' },
     { text: 'Users', icon: <PeopleIcon />, page: 'users' },
     { text: 'Projects', icon: <FolderIcon />, page: 'projects' },
     { text: 'Settings', icon: <SettingsIcon />, page: 'settings' },
   ];
 
+  const navigate = useNavigate();
   const handleItemClick = (page) => {
     onNavigate(page);
+    navigate(page);
     if (onClose) {
       onClose();
     }
