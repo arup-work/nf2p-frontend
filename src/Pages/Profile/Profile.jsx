@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     Box,
@@ -16,6 +16,7 @@ import {
     InputAdornment,
     Chip,
     Stack,
+    Badge
 } from '@mui/material';
 import {
     Edit as EditIcon,
@@ -28,6 +29,7 @@ import {
     Visibility,
     VisibilityOff,
     Password,
+    PhotoCamera,
 } from '@mui/icons-material';
 import StyledMainLayout from "../../Components/StyledMainLayout";
 import UserService from "../../Services/UserService";
@@ -42,6 +44,13 @@ const Profile = () => {
 
     const [isEditing, setIsEditing] = useState(true);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
+    // Add state for profile image
+    const [profileImage, setProfileImage] = useState(authDetails.profileImage || null);
+    const [imagePreview, setImagePreview] = useState(authDetails.profileImage || null);
+
+    // File input ref
+    const fileInputRef = useRef(null);
 
 
     // Form State
@@ -113,6 +122,38 @@ const Profile = () => {
 
     }
 
+    // Handle file selection
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showErrorToast('Please select an image file');
+                return;
+            }
+
+            // Validate file size (e.g., max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showErrorToast('Image size should be less than 5MB');
+                return;
+            }
+
+            // Create preview
+            const reader = new FileReader();
+            console.log(reader);
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+
+            // Store file for upload
+            setProfileImage(file);
+
+            // Upload immediately (optional)
+            // handleImageUpload(file);
+        }
+    };
+
     useEffect(() => {
         getMe();
     }, [])
@@ -132,19 +173,56 @@ const Profile = () => {
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 3 }}>
-                        <Avatar
-                            sx={{
-                                width: 120,
-                                height: 120,
-                                fontSize: '3rem',
-                                fontWeight: 'bold',
-                                bgcolor: 'rgba(255, 255, 255, 0.3)',
-                                border: '4px solid white',
-                                boxShadow: 3,
-                            }}
-                        >
-                            {getInitials(authDetails.firstName + ' ' + authDetails.lastName)}
-                        </Avatar>
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleImageChange}
+                            />
+
+                            <Badge
+                                overlap="circular"
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                badgeContent={
+                                    <IconButton
+                                        onClick={() => fileInputRef.current?.click()}
+                                        sx={{
+                                            bgcolor: 'primary.main',
+                                            color: 'white',
+                                            width: 40,
+                                            height: 40,
+                                            '&:hover': {
+                                                bgcolor: 'primary.dark',
+                                            },
+                                            boxShadow: 2
+                                        }}
+                                    >
+                                        <PhotoCamera fontSize="small" />
+                                    </IconButton>
+                                }
+                            >
+                                <Avatar
+                                    src={imagePreview}
+                                    sx={{
+                                        width: 120,
+                                        height: 120,
+                                        fontSize: '3rem',
+                                        fontWeight: 'bold',
+                                        bgcolor: imagePreview ? 'transparent' : 'rgba(255, 255, 255, 0.3)',
+                                        border: '4px solid white',
+                                        boxShadow: 3,
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    {!imagePreview && getInitials(authDetails.firstName + ' ' + authDetails.lastName)}
+                                </Avatar>
+                            </Badge>
+
+
+                        </Box>
 
                         <Box sx={{ flex: 1 }}>
                             <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -302,64 +380,6 @@ const Profile = () => {
                                     />
                                 </Grid>
                             </Grid>
-
-                            {/* {isEditing && (
-                                <>
-                                    <Divider sx={{ my: 3 }} />
-                                    <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                        Change Password
-                                    </Typography>
-                                    <Grid container spacing={3} sx={{ mt: 1 }}>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Current Password"
-                                                name="currentPassword"
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={formData.currentPassword}
-                                                onChange={handleInputChange}
-                                                variant="outlined"
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton
-                                                                onClick={() => setShowPassword(!showPassword)}
-                                                                edge="end"
-                                                            >
-                                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        </Grid>
-
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <TextField
-                                                fullWidth
-                                                label="New Password"
-                                                name="newPassword"
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={formData.newPassword}
-                                                onChange={handleInputChange}
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <TextField
-                                                fullWidth
-                                                label="Confirm New Password"
-                                                name="confirmPassword"
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={formData.confirmPassword}
-                                                onChange={handleInputChange}
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </>
-                            )} */}
                             <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
                                 <Button
                                     variant="contained"

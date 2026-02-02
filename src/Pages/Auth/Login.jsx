@@ -25,7 +25,7 @@ const Login = () => {
     const handleFormSubmit = async (values, { setSubmitting }) => {
         const { email, password } = values;
         const response = await AuthService.login(email, password);
-        // console.log(response);
+        console.log(response);
 
         dispatch(login({
             token: response.data.token,
