@@ -28,8 +28,8 @@ const Login = () => {
         console.log(response);
 
         dispatch(login({
-            token: response.data.token,
-            user: response.data.user
+            token: response.data.data.token,
+            user: response.data.data.user
         }));
         dispatch(setFlashMessage({
             message: response.message,

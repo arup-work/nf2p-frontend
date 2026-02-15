@@ -10,7 +10,7 @@ const user = (() => {
 })();
 
 const initialAuthState = {
-    isAuthenticated: !!token,
+    isAuthenticated: false,
     user: { firstName: '', lastName: '', email: '', id: '' },
     token: null,
 }
@@ -21,9 +21,7 @@ const authenticateSlice = createSlice({
     reducers: {
         login(state, action) {
             const { token, user } = action.payload;
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
+            console.log(action.payload)
 
             state.isAuthenticated = true;
             state.user = user;
