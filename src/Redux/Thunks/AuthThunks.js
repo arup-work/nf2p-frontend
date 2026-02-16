@@ -8,8 +8,8 @@ export const initializeAuth = createAsyncThunk(
         try {
             const { data } = await api.post('/auth/refresh');
             dispatch(login({
-                accessToken: data.accessToken,
-                user: data.user
+                accessToken: data.data.accessToken,
+                user: data.data.user
             }))
         } catch (error) {
             dispatch(logout());
