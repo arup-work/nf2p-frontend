@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import { BrowserRouter } from 'react-router-dom'
 import RouteComponent from './Routes/Index'
 import { useDispatch } from 'react-redux'
+import { initializeAuth } from './Redux/Thunks/AuthThunks'
 // import viteLogo from '/vite.svg'
 // import './App.css'
 
@@ -12,7 +13,7 @@ function App() {
 
   useEffect(() => {
     dispatch(initializeAuth());
-  })
+  },[])
 
   return (
     <BrowserRouter>
