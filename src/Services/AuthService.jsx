@@ -10,13 +10,14 @@ const AuthService = {
             showSuccessToast(response.message);
             return response;
         } catch (error) {
-            showErrorToast(error.message);
+            const msg = error.response?.data?.message || "Login failed. Please try again.";
+            showErrorToast(msg);
         }
     },
 
     register: async (firstName, lastName, email, password) => {
         try {
-            const response = await apiRequest('auth/register', "POST", { firstName, lastName, email, password });
+            const response = await api.post('auth/register', { firstName, lastName, email, password });
             showSuccessToast(response.message);
             return response;
         } catch (error) {
