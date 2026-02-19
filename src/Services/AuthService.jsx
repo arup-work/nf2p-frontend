@@ -7,7 +7,7 @@ const AuthService = {
         try {
             // const response = await apiRequest('auth/login', "POST", { email, password });
             const response = await api.post("auth/login",{email, password});
-            showSuccessToast(response.message);
+            showSuccessToast(response?.data?.message);
             return response;
         } catch (error) {
             const msg = error.response?.data?.message || "Login failed. Please try again.";
@@ -18,7 +18,7 @@ const AuthService = {
     register: async (firstName, lastName, email, password) => {
         try {
             const response = await api.post('auth/register', { firstName, lastName, email, password });
-            showSuccessToast(response.message);
+            showSuccessToast(response?.data?.message);
             return response;
         } catch (error) {
             const message = error.response?.data?.message || error.message || "Registration failed";
@@ -29,8 +29,8 @@ const AuthService = {
 
     forgetPassword: async (email) => {
         try {
-            const response = await apiRequest('auth/forgot-password', "POST", { email });
-            showSuccessToast(response.message);
+            const response = await api.post('auth/forgot-password', { email });
+            showSuccessToast(response?.data?.message);
             return response;
         } catch (error) {
             const message = error.response?.data?.message || error.message || "Password recovery failed";
@@ -42,7 +42,7 @@ const AuthService = {
     resetPassword: async (password, token) => {
         try {
             const response = await apiRequest(`auth/reset-password/${token}`, "POST", { password });
-            showSuccessToast(response.message);
+            showSuccessToast(response?.data?.message);
             return response;
         } catch (error) {
             const message = error.response?.data?.message || error.message || "Password recovery failed";
