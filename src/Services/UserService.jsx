@@ -4,9 +4,16 @@ import { showErrorToast, showSuccessToast } from "../Helpers/Utils/ToastUtils";
 
 const UserService = {
     me: async (token) => {
-        const bearerToken = { 'Authorization': `Bearer ${token}` };        
+        const bearerToken = { 'Authorization': `Bearer ${token}` };
         const response = await apiRequest('user/me', 'GET', null, bearerToken);
         return response.data;
+    },
+    logout: async () => {
+        try {
+            const response = await api.post('auth/')
+        }catch(error){
+
+        }
     },
     profileUpdate: async (token, firstName, lastName, bio, phone, location) => {
         try {
@@ -20,7 +27,7 @@ const UserService = {
     },
     updatePassword: async (token, currentPassword, newPassword) => {
         console.log(token);
-        
+
         try {
             const bearerToken = { 'Authorization': `Bearer ${token}` };
             const response = await apiRequest('user/update-password', 'PUT', { currentPassword, newPassword }, bearerToken);
