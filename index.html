@@ -2,12 +2,56 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nf2p-frontend</title>
+    <title>N2P</title>
+
+    <!-- Pre-loader styles – exact match to your React Loader -->
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family: system-ui, sans-serif;
+      }
+
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(243, 239, 239, 0.9); /* dark overlay – adjust opacity if needed */
+        z-index: 99999;
+      }
+
+      .loader-spinner {
+        border: 6px dotted #3498db;        /* same as your React loader */
+        border-radius: 50%;
+        width: 140px;
+        height: 140px;
+        animation: spin 3s linear infinite; /* same speed & style */
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Hide pre-loader as soon as React renders anything into #root */
+      #root:not(:empty) ~ #initial-loader {
+        display: none !important;
+      }
+    </style>
   </head>
+
   <body>
     <div id="root"></div>
+
+    <!-- Instant pre-loader – shown before React starts -->
+    <div id="initial-loader">
+      <div class="loader-spinner"></div>
+    </div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

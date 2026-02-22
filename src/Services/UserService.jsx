@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import apiRequest from "../Helpers/Utils/Api"
 import { showErrorToast, showSuccessToast } from "../Helpers/Utils/ToastUtils";
+import api from "../Helpers/Utils/Api";
 
 const UserService = {
     me: async (token) => {
@@ -9,11 +10,8 @@ const UserService = {
         return response.data;
     },
     logout: async () => {
-        try {
-            const response = await api.post('auth/')
-        }catch(error){
-
-        }
+        const response = await api.post('user/logout');
+        return response.data;
     },
     profileUpdate: async (token, firstName, lastName, bio, phone, location) => {
         try {

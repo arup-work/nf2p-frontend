@@ -1,8 +1,9 @@
 import axios from "axios";
+import reduxStore from "../../Redux/Index";
 
 const api = axios.create({
     baseURL: 'http://localhost:8000/api/v1',
-    timeout: 3000,
+    timeout: 30000,
     withCredentials: true,
 })
 
@@ -21,6 +22,7 @@ const processQueue = (error, token = null) => {
         if (error) prom.reject(error);
         else prom.resolve(token);
     });
+    failedQueue = [];
 }
 
 // Response interceptor - catches 401 → tries to refresh → retries original request
@@ -37,7 +39,7 @@ api.interceptors.response.use(
                     failedQueue.push({ resolve, reject });
                 })
                     .then((token) => {
-                        // originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                        originalRequest.headers['Authorization'] = `Bearer ${token}`;
                         return api(originalRequest);
                     })
                     .catch((err) => Promise.reject(err));
@@ -47,19 +49,38 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // Call your refresh endpoint (cookie is sent automatically!)
-                const { data } = await api.post('/auth/refresh');
+                // Call refresh (cookie is sent automatically)
+                const response = await api.post('/auth/refresh');
+                
+                const data = response.data;
+                if (!data.success) {
+                    reduxStore.dispatch({
+                        type: 'logout'
+                    });
 
-                const newAccessToken = data.accessToken;
+                    window.location.href = '/';
+                }
 
-                // 1. Save new access token somewhere (localStorage / context / zustand)
-                localStorage.setItem('accessToken', newAccessToken); // ← example
+                const newAccessToken =  data?.data?.token;
 
-                // 2. Update default header for future requests
+                if (!newAccessToken) {
+                    throw new Error("No access token in refresh response");
+                }
+
+                // Update Redux (this is the only place token lives now)
+                reduxStore.dispatch({
+                    type: 'login',
+                    payload: {
+                        token: newAccessToken,
+                        user: data?.data?.user || reduxStore.getState().auth.user,
+                    }
+                })
+                //Update default header for future requests
                 api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
 
-                // 3. Update the original request header too
+                //Update the original request header too
                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
 
                 // Resolve all queued requests
                 processQueue(null, newAccessToken);
@@ -71,8 +92,11 @@ api.interceptors.response.use(
                 processQueue(refreshError, null);
 
                 // Optional: dispatch logout action, redirect to login
+                reduxStore.dispatch({
+                    type: 'logout'
+                });
+
                 window.location.href = '/';
-                localStorage.removeItem('accessToken');
 
                 return Promise.reject(refreshError);
             } finally {
@@ -88,7 +112,7 @@ api.interceptors.response.use(
 // Request interceptor - automatically add token if exists
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
+        const token = reduxStore.getState().auth.token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

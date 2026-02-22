@@ -24,11 +24,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../Redux/Slices/AuthSlice';
 import { useNavigate } from 'react-router-dom';
 import { setFlashMessage } from '../../Redux/Slices/FlashSlice';
+import UserService from '../../Services/UserService';
 
 export function Navbar({ onMenuClick, onNavigate }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const authDetails = useSelector(state => state.auth.user);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -62,12 +63,16 @@ export function Navbar({ onMenuClick, onNavigate }) {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    dispatch(setFlashMessage({
-      message: "You have been logged out successfully!",
-      type: "success"
-    }))
-    dispatch(logout());
+  const handleLogout = async () => {
+    const response = await UserService.logout();
+    if (response.success) {
+      dispatch(setFlashMessage({
+        message: "You have been logged out successfully!",
+        type: "success"
+      }))
+      dispatch(logout());
+    }
+
   };
 
   const handleProfileClick = () => {

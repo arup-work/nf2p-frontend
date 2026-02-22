@@ -42,6 +42,7 @@ const PublicOnlyRoute = ({ isAuthenticated }) => {
 };
 const RouteComponent = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+    
     return (
         <Routes>
             <Route element={<PublicOnlyRoute isAuthenticated={isAuthenticated} />}>
