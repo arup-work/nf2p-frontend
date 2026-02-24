@@ -115,15 +115,13 @@ const Profile = () => {
     }
 
     const handleSave = async () => {
-        console.log(formData);
-
-        const response = await UserService.profileUpdate(formData.firstName, formData.lastName, formData.bio, formData.phone, formData.location);
+        const { data } = await UserService.profileUpdate(formData.firstName, formData.lastName, formData.bio, formData.phone, formData.location);
         dispatch(mE({
             user: {
-                firstName: response.firstName,
-                lastName: response.lastName,
-                email: response.email,
-                id: response._id,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                id: data._id,
             }
         }));
 
@@ -147,7 +145,6 @@ const Profile = () => {
 
             // Create preview
             const reader = new FileReader();
-            console.log(reader);
             reader.onloadend = () => {
                 setImagePreview(reader.result);
             };

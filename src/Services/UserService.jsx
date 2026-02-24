@@ -14,8 +14,8 @@ const UserService = {
     },
     profileUpdate: async (firstName, lastName, bio, phone, location) => {
         try {
-            const response = await api.post('/user/profile', { firstName, lastName, bio, phone, location });
-            showSuccessToast(response.message);
+            const response = await api.put('user/profile', { firstName, lastName, bio, phone, location });
+            showSuccessToast(response.data.message);
             return response.data;
         } catch (error) {
             showErrorToast(error.message);
