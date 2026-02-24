@@ -98,19 +98,26 @@ const Profile = () => {
     }
 
     const getMe = async () => {
-        const response = await UserService.me(token);
-        setFormData({
-            ...formData,
-            firstName: response.firstName,
-            lastName: response.lastName,
-            bio: response.bio,
-            location: response.location,
-            phone: response.phone,
-        })
+        const response = await UserService.me();
+        if (response.success) {
+            const { data } = response;
+            setFormData({
+                ...formData,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                bio: data.bio,
+                location: data.location,
+                phone: data.phone,
+            })
+        }
+
+
     }
 
     const handleSave = async () => {
-        const response = await UserService.profileUpdate(token, formData.firstName, formData.lastName, formData.bio, formData.phone, formData.location);
+        console.log(formData);
+
+        const response = await UserService.profileUpdate(formData.firstName, formData.lastName, formData.bio, formData.phone, formData.location);
         dispatch(mE({
             user: {
                 firstName: response.firstName,
@@ -282,7 +289,7 @@ const Profile = () => {
                                         fullWidth
                                         label="First Name"
                                         name="firstName"
-                                        value={formData.firstName}
+                                        value={formData?.firstName || ''}
                                         onChange={handleInputChange}
                                         variant="outlined"
                                     />
@@ -293,7 +300,7 @@ const Profile = () => {
                                         fullWidth
                                         label="Last Name"
                                         name="lastName"
-                                        value={formData.lastName}
+                                        value={formData?.lastName || ''}
                                         onChange={handleInputChange}
                                         variant="outlined"
                                     />
@@ -306,7 +313,7 @@ const Profile = () => {
                                         label="Email Address"
                                         name="email"
                                         type="email"
-                                        value={formData.email}
+                                        value={formData?.email || ''}
                                         onChange={handleInputChange}
                                         disabled={true}
                                         variant="outlined"
@@ -325,7 +332,7 @@ const Profile = () => {
                                         fullWidth
                                         label="Phone Number"
                                         name="phone"
-                                        value={formData.phone}
+                                        value={formData?.phone || ''}
                                         onChange={handleInputChange}
                                         variant="outlined"
                                         placeholder="+1 (555) 000-0000"
@@ -345,7 +352,7 @@ const Profile = () => {
                                         fullWidth
                                         label="Location"
                                         name="location"
-                                        value={formData.location}
+                                        value={formData?.location || ''}
                                         onChange={handleInputChange}
                                         variant="outlined"
                                         placeholder="City, State, Country"
@@ -365,7 +372,7 @@ const Profile = () => {
                                         fullWidth
                                         label="Bio"
                                         name="bio"
-                                        value={formData.bio}
+                                        value={formData?.bio || ''}
                                         onChange={handleInputChange}
                                         multiline
                                         rows={2}
